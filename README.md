@@ -1,7 +1,7 @@
 # twitter-data-eng
 Short Description: Automated Twitter data pipeline using Python, Airflow, and AWS. Extracts tweets, transforms them to CSV, and stores results in Amazon S3—integrating cloud orchestration and best practices for scalable, real-time data engineering.
-Project Overview:
 
+Project Overview:
 This end-to-end data engineering project focuses on building an automated data pipeline to extract, transform, and store real-time Twitter data. The pipeline is architected using Python, Apache Airflow (an open-source workflow orchestration system), and various AWS services, notably EC2 and S3.
 
 Key Components & Steps:
