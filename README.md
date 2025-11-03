@@ -15,6 +15,9 @@ Automated Twitter data pipeline using **Python**, **Airflow**, and **AWS**. Extr
 - 🔐 **IAM Roles:** Secure AWS resource access configuration  
 
 ---
+<img width="773" height="325" alt="image" src="https://github.com/user-attachments/assets/f12af930-9245-4d89-b809-ecfc4ac3a626" />
+
+---
 
 ## 📊 Project Overview
 
