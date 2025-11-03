@@ -1,50 +1,51 @@
-Short Description: Automated Twitter data pipeline using Python, Airflow, and AWS. Extracts tweets, transforms them to CSV, and stores results in Amazon S3—integrating cloud orchestration and best practices for scalable, real-time data engineering.
+# 🚀 Automated Twitter Data Pipeline
 
-Key technologies used in the project:
+**Short Description:**  
+Automated Twitter data pipeline using **Python**, **Airflow**, and **AWS**. Extracts tweets, transforms them to CSV, and stores results in **Amazon S3**—integrating cloud orchestration and best practices for scalable, real-time data engineering.
 
-Python: Data extraction, transformation, and scripting
+---
 
-Twitter API (tweepy): Fetching real-time tweets
+## 🧰 Key Technologies Used
+- 🐍 **Python:** Data extraction, transformation, and scripting  
+- 🐦 **Twitter API (tweepy):** Fetching real-time tweets  
+- 🧹 **Pandas:** Data cleaning and CSV export  
+- ⚙️ **Apache Airflow:** Workflow orchestration and automation  
+- ☁️ **AWS EC2:** Cloud server for running Airflow  
+- 💾 **AWS S3:** Cloud data storage for outputs  
+- 🔐 **IAM Roles:** Secure AWS resource access configuration  
 
-Pandas: Data cleaning and CSV export
+---
 
-Apache Airflow: Workflow orchestration and automation
+## 📊 Project Overview
 
-AWS EC2: Cloud server for running Airflow
+This end-to-end data engineering project focuses on building an automated data pipeline to extract, transform, and store real-time Twitter data. The pipeline is architected using **Python**, **Apache Airflow** (an open-source workflow orchestration system), and **AWS services** such as **EC2** and **S3**.
 
-AWS S3: Cloud data storage for outputs
+---
 
-IAM Roles: Secure AWS resource access configuration
+## 🧩 Key Components & Steps
 
-Project Overview:
+### 1️⃣ Data Extraction  
+Authenticates to the **Twitter API** using custom keys and tokens. With **Python** and the **tweepy** library, the pipeline programmatically fetches posts (tweets) from a specified Twitter account. Data such as tweet content, like counts, retweet counts, and timestamps are gathered in **JSON** format.
 
-This end-to-end data engineering project focuses on building an automated data pipeline to extract, transform, and store real-time Twitter data. The pipeline is architected using Python, Apache Airflow (an open-source workflow orchestration system), and various AWS services, notably EC2 and S3.
+### 2️⃣ Data Transformation  
+Raw JSON data is cleaned and structured using **pandas**, producing a clean DataFrame. Essential information—username, tweet text, engagement metrics, and creation date—is extracted, then serialized and stored in **CSV** format for further analysis.
 
-Key Components & Steps:
+### 3️⃣ Airflow Orchestration (Workflow Automation)  
+The core pipeline logic is modularized in Python scripts. **Airflow DAGs (Directed Acyclic Graphs)** define each step as a task, allowing scheduled and monitored execution. Airflow runs on an **AWS EC2** instance (Ubuntu), deploying the pipeline code to the cloud server.
 
-Data Extraction:
-The process begins by authenticating to the Twitter API using custom keys and tokens. With the help of Python and the tweepy library, the pipeline programmatically fetches posts (tweets) from a specified Twitter account. Data such as tweet content, like counts, retweet counts, and timestamps are gathered in JSON format.
+### 4️⃣ AWS Integration  
+The final processed data is uploaded to an **Amazon S3** bucket. Full permissions using **IAM Roles** allow secure EC2-to-S3 access. The project demonstrates AWS infrastructure setup and secure Airflow DAG management in the cloud.
 
-Data Transformation:
-Raw JSON data is transformed by parsing and converting it into a structured format using the pandas library, producing a clean DataFrame. Essential information—username, tweet text, engagement metrics, and creation date—is extracted for each post. The transformed data is then serialized and stored in CSV format, ready for further analysis.
+### 5️⃣ Automation & Monitoring  
+The **Airflow web UI** enables monitoring of task status, log access, rerunning failed jobs, and visual DAG graphs. Automated retries enhance reliability.
 
-Airflow Orchestration (Workflow Automation):
-The core pipeline logic, including extraction and transformation functions, is encapsulated within Python modules for modularity. Airflow DAGs (Directed Acyclic Graphs) define each step as a task, allowing for scheduled and monitored pipeline execution. Apache Airflow is installed and managed on an AWS EC2 instance (Ubuntu), and the pipeline code is deployed to this cloud server.
+---
 
-AWS Integration:
-The final, processed data is uploaded to an Amazon S3 bucket instead of being stored only locally. Full permissions are configured using AWS IAM roles to allow EC2 (running Airflow) secure access to write to S3 buckets.
-The pipeline project demonstrates how to set up and configure AWS infrastructure (EC2, S3, IAM) and securely deploy, manage, and run Airflow DAGs in the cloud.
+## 🎯 Learning & Practical Outcomes
 
-Automation & Monitoring:
-With Airflow’s web UI, users can monitor the status of each task, rerun failed jobs, access detailed logs, and view the DAG graph. The workflow includes automated retry logic to handle failures robustly.
+- Set up and manage a **Python-based ETL pipeline** on cloud infrastructure.  
+- Understand real-world challenges like **cloud authentication**, **permissions troubleshooting**, and **workflow orchestration**.  
+- Gain hands-on experience with **Twitter API**, **data wrangling**, **Airflow automation**, and **AWS cloud services**.  
+- Apply best practices for **modular code design** and **cloud infrastructure integration**.
 
-Learning & Practical Outcomes:
-
-Learn how to set up and manage a Python-based ETL pipeline on the cloud using industry-standard tools.
-
-Understand real-world challenges such as cloud authentication, troubleshooting permissions, and working with workflow orchestration.
-
-Gain hands-on experience working with Twitter’s API, data wrangling in Python, Airflow automation, and AWS services.
-
-The project demonstrates not only the technical build but also best practices for modular code design and infrastructure-as-a-service integration.
-
+---
