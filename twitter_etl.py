@@ -23,6 +23,20 @@ def first_value(row, fields):
     return None
 
 
+def coerce_count(value):
+    if value in (None, ""):
+        return 0
+    try:
+        if pd.isna(value):
+            return 0
+    except (TypeError, ValueError):
+        pass
+    try:
+        return int(float(str(value).replace(",", "")))
+    except (TypeError, ValueError):
+        return 0
+
+
 def read_xquik_export(path):
     export_path = Path(path)
     suffix = export_path.suffix.lower()
@@ -56,8 +70,8 @@ def normalize_xquik_rows(rows):
             {
                 "user": row.get("username") or row.get("user") or "xquik",
                 "text": str(text).strip(),
-                "favorite_count": int(first_value(row, LIKE_FIELDS) or 0),
-                "retweet_count": int(first_value(row, RETWEET_FIELDS) or 0),
+                "favorite_count": coerce_count(first_value(row, LIKE_FIELDS)),
+                "retweet_count": coerce_count(first_value(row, RETWEET_FIELDS)),
                 "created_at": first_value(row, DATE_FIELDS) or "",
             }
         )
