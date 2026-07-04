@@ -8,6 +8,7 @@ Automated Twitter data pipeline using **Python**, **Airflow**, and **AWS**. Extr
 ## 🧰 Key Technologies Used
 - 🐍 **Python:** Data extraction, transformation, and scripting  
 - 🐦 **Twitter API (tweepy):** Fetching real-time tweets  
+- 📄 **Xquik exports:** Replaying CSV, JSON, or JSONL tweet exports
 - 🧹 **Pandas:** Data cleaning and CSV export  
 - ⚙️ **Apache Airflow:** Workflow orchestration and automation  
 - ☁️ **AWS EC2:** Cloud server for running Airflow  
@@ -30,8 +31,33 @@ This end-to-end data engineering project focuses on building an automated data p
 ### 1️⃣ Data Extraction  
 Authenticates to the **Twitter API** using custom keys and tokens. With **Python** and the **tweepy** library, the pipeline programmatically fetches posts (tweets) from a specified Twitter account. Data such as tweet content, like counts, retweet counts, and timestamps are gathered in **JSON** format.
 
+For offline or repeatable analysis, set `XQUIK_EXPORT_PATH` to a Xquik CSV,
+JSON, or JSONL export. The ETL maps common tweet text, engagement, author, and
+timestamp fields into the same `refined_tweets.csv` output schema used by the
+live API path.
+
 ### 2️⃣ Data Transformation  
 Raw JSON data is cleaned and structured using **pandas**, producing a clean DataFrame. Essential information—username, tweet text, engagement metrics, and creation date—is extracted, then serialized and stored in **CSV** format for further analysis.
+
+Configure credentials and output paths with environment variables:
+
+```bash
+export TWITTER_CONSUMER_KEY='your_consumer_key'
+export TWITTER_CONSUMER_SECRET='your_consumer_secret'
+export TWITTER_ACCESS_TOKEN='your_access_token'
+export TWITTER_ACCESS_TOKEN_SECRET='your_access_token_secret'
+export TWITTER_USERNAME='elonmusk'
+export TWITTER_MAX_RESULTS='200'
+export TWITTER_OUTPUT_PATH='refined_tweets.csv'
+```
+
+Replay a Xquik export without live Twitter credentials:
+
+```bash
+export XQUIK_EXPORT_PATH='data/xquik-export.jsonl'
+export TWITTER_OUTPUT_PATH='refined_tweets.csv'
+python twitter_etl.py
+```
 
 ### 3️⃣ Airflow Orchestration (Workflow Automation)  
 The core pipeline logic is modularized in Python scripts. **Airflow DAGs (Directed Acyclic Graphs)** define each step as a task, allowing scheduled and monitored execution. Airflow runs on an **AWS EC2** instance (Ubuntu), deploying the pipeline code to the cloud server.
