@@ -1,33 +1,111 @@
 import tweepy
-import pandas as pd 
 import json
-from datetime import datetime
-import s3fs 
+from pathlib import Path
+import os
+
+import pandas as pd
+
+
+DEFAULT_USERNAME = "elonmusk"
+DEFAULT_OUTPUT_PATH = "refined_tweets.csv"
+TEXT_FIELDS = ("text", "full_text", "content", "tweet_text")
+DATE_FIELDS = ("created_at", "createdAt", "date", "timestamp")
+LIKE_FIELDS = ("favorite_count", "like_count", "likes", "favorites")
+RETWEET_FIELDS = ("retweet_count", "reposts", "retweets", "shares")
+WRAPPED_FIELDS = ("tweets", "data", "results", "items")
+
+
+def first_value(row, fields):
+    for field in fields:
+        value = row.get(field)
+        if value not in (None, ""):
+            return value
+    return None
+
+
+def read_xquik_export(path):
+    export_path = Path(path)
+    suffix = export_path.suffix.lower()
+    if suffix == ".csv":
+        return pd.read_csv(export_path).to_dict("records")
+
+    text = export_path.read_text(encoding="utf-8").strip()
+    if not text:
+        return []
+    if suffix == ".jsonl":
+        return [json.loads(line) for line in text.splitlines() if line.strip()]
+
+    payload = json.loads(text)
+    if isinstance(payload, list):
+        return payload
+    if isinstance(payload, dict):
+        for field in WRAPPED_FIELDS:
+            rows = payload.get(field)
+            if isinstance(rows, list):
+                return rows
+    return []
+
+
+def normalize_xquik_rows(rows):
+    refined_tweets = []
+    for row in rows:
+        text = first_value(row, TEXT_FIELDS)
+        if text is None or not str(text).strip():
+            continue
+        refined_tweets.append(
+            {
+                "user": row.get("username") or row.get("user") or "xquik",
+                "text": str(text).strip(),
+                "favorite_count": int(first_value(row, LIKE_FIELDS) or 0),
+                "retweet_count": int(first_value(row, RETWEET_FIELDS) or 0),
+                "created_at": first_value(row, DATE_FIELDS) or "",
+            }
+        )
+    return refined_tweets
+
+
+def write_tweets(refined_tweets):
+    output_path = os.getenv("TWITTER_OUTPUT_PATH", DEFAULT_OUTPUT_PATH)
+    df = pd.DataFrame(refined_tweets)
+    df.to_csv(output_path, index=False)
+    return output_path
+
 
 def run_twitter_etl():
+    xquik_export_path = os.getenv("XQUIK_EXPORT_PATH")
+    if xquik_export_path:
+        refined_tweets = normalize_xquik_rows(read_xquik_export(xquik_export_path))
+        output_path = write_tweets(refined_tweets)
+        print(f"Imported {len(refined_tweets)} Xquik rows to {output_path}.")
+        return refined_tweets
 
-    access_key = "" 
-    access_secret = "" 
-    consumer_key = ""
-    consumer_secret = ""
-
+    consumer_key = os.getenv("TWITTER_CONSUMER_KEY")
+    consumer_secret = os.getenv("TWITTER_CONSUMER_SECRET")
+    access_key = os.getenv("TWITTER_ACCESS_TOKEN")
+    access_secret = os.getenv("TWITTER_ACCESS_TOKEN_SECRET")
+    required_values = [consumer_key, consumer_secret, access_key, access_secret]
+    if any(value in (None, "") for value in required_values):
+        raise ValueError(
+            "Set TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET, "
+            "TWITTER_ACCESS_TOKEN, and TWITTER_ACCESS_TOKEN_SECRET."
+        )
 
     # Twitter authentication
-    auth = tweepy.OAuthHandler(access_key, access_secret)   
-    auth.set_access_token(consumer_key, consumer_secret) 
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_key, access_secret)
 
     # # # Creating an API object 
     api = tweepy.API(auth)
-    tweets = api.user_timeline(screen_name='@elonmusk', 
-                            # 200 is the maximum allowed count
-                            count=200,
-                            include_rts = False,
-                            # Necessary to keep full_text 
-                            # otherwise only the first 140 words are extracted
-                            tweet_mode = 'extended'
-                            )
+    username = os.getenv("TWITTER_USERNAME", DEFAULT_USERNAME)
+    count = int(os.getenv("TWITTER_MAX_RESULTS", "200"))
+    tweets = api.user_timeline(
+        screen_name=username,
+        count=count,
+        include_rts=False,
+        tweet_mode="extended",
+    )
 
-    list = []
+    refined_tweets = []
     for tweet in tweets:
         text = tweet._json["full_text"]
 
@@ -37,7 +115,12 @@ def run_twitter_etl():
                         'retweet_count' : tweet.retweet_count,
                         'created_at' : tweet.created_at}
         
-        list.append(refined_tweet)
+        refined_tweets.append(refined_tweet)
 
-    df = pd.DataFrame(list)
-    df.to_csv('refined_tweets.csv')
+    output_path = write_tweets(refined_tweets)
+    print(f"Wrote {len(refined_tweets)} rows to {output_path}.")
+    return refined_tweets
+
+
+if __name__ == "__main__":
+    run_twitter_etl()
